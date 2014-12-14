@@ -1,7 +1,7 @@
 /* 
  * Basic class to illustrate expanding a provision query for Legislation Advanced Query
  * 
- * Uses Map containing prefixes for each provision type to expand out the provision query  
+ * Uses map containing prefixes for each provision type to expand out the provision query  
  *  
 */
 
