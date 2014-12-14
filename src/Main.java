@@ -29,13 +29,14 @@ public class Main {
 		String inputtedProvisionType = br.readLine();
 		
 		//Only set up to deal with "section" and "regulation" provision types
-		if (inputtedProvisionType.equals("section") || inputtedProvisionType.equals("regulation"))
+		if (inputtedProvisionType.equals("section") || inputtedProvisionType.equals("regulation") ||
+				inputtedProvisionType.equals("rule"))
 		{			
 			provType = inputtedProvisionType;
 		}
 		else
 		{
-			System.out.print("Please run again inputting either \"section\" or \"regulation\" for provision type");
+			System.out.print("Please run again inputting either \"section\", \"rule\" or \"regulation\" for provision type");
 			System.exit(1);
 		}	
 		
@@ -54,8 +55,10 @@ public class Main {
 		final Map<String, Object> provTypes = new HashMap<String, Object>();			
 		final String[] sectionPrefixes = {"section", "s"};
 		final String[] regulationPrefixes = {"regulation", "reg", "r"};
+		final String[] rulePrefixes = {"rule", "r"};
 		provTypes.put("section", sectionPrefixes);
-		provTypes.put("regulation", regulationPrefixes);				
+		provTypes.put("regulation", regulationPrefixes);
+		provTypes.put("rule", rulePrefixes);
 		
 		final String or = " OR ";
 		final String quote = "\"";
