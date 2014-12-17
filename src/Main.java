@@ -22,6 +22,7 @@ public class Main {
 		displayQuery();		
 	}
 
+	//method here for ability to run query expansion method via console window to speed up development
 	public static void displayQuery() throws Exception {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	
@@ -30,9 +31,8 @@ public class Main {
 		String expandedQuery;
 	
 		System.out.print("Enter Provision Type: ");
-		String inputtedProvisionType = br.readLine();
+		String inputtedProvisionType = br.readLine();		
 		
-		//Only set up to deal with "section" and "regulation" provision types
 		if (inputtedProvisionType.equals("article") || inputtedProvisionType.equals("chapter") || inputtedProvisionType.equals("paragraph")
 				|| inputtedProvisionType.equals("part") || inputtedProvisionType.equals("regulation") || inputtedProvisionType.equals("rule")
 				|| inputtedProvisionType.equals("section") || inputtedProvisionType.equals("schedule"))
