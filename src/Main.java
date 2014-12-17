@@ -12,12 +12,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 public class Main {
 
+	public static final Pattern PROVNUMBER_FIELD_PATTERN = Pattern.compile("PR\\((.*?)\\)");
+	public static final Pattern PROVTYPE_FIELD_PATTERN = Pattern.compile("PT\\((.*?)\\)");
+	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.*?)\\)");
+	
 	public static void main(String[] args) throws Exception {		
 		displayQuery();		
 	}
@@ -49,9 +55,18 @@ public class Main {
 		String inputtedProvisionNumber = br.readLine();
 		provNumber = inputtedProvisionNumber;
 		
+		System.out.print("Enter full query sting: ");
+		String inputtedQueryString = br.readLine();		
+		String titleField = retrieveQueryFieldValues(TITLE_FIELD_PATTERN, inputtedQueryString);
+		String provTypeField = retrieveQueryFieldValues(PROVTYPE_FIELD_PATTERN, inputtedQueryString);
+		String provNumberField = retrieveQueryFieldValues(PROVNUMBER_FIELD_PATTERN, inputtedQueryString);
+		
 		expandedQuery = expandQuery(provType, provNumber);
 		
 		System.out.println("Expanded Query Is: " + expandedQuery);
+		System.out.println("Title Field Value Is: " + titleField);
+		System.out.println("Type Field Value Is: " + provTypeField);
+		System.out.println("Number Field Value Is: " + provNumberField);
 	}
 
 	public static String expandQuery(final String provisionType, final String provisionNumber) {				
@@ -98,10 +113,19 @@ public class Main {
 		return expandedQuery;			
 	}
 	
-	public static String retrieveQueryFieldValues()
+	public static String retrieveQueryFieldValues(final Pattern pattern, final String query)
 	{
-		//Get the novus field values from the inputted query string
-		return null;
+		String value = "";
+		Matcher matcher = pattern.matcher(query);
+		if (matcher.find())
+		{
+			value = matcher.group(1);
+		}
+		else
+		{
+			value = "Didn't work";
+		}
+		return value;
 	}
 	
 	public void addAdditionalFields()
