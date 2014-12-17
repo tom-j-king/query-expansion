@@ -85,8 +85,10 @@ public class Main {
 		
 		for (String prefix : currentPrefixes)
 		{			
+			//pre-formed version of the query
 			terms.add(prefix + "" + provisionNumber);
-			terms.add(prefix +"." + provisionNumber);
+			terms.add(prefix + "." + provisionNumber);
+			terms.add(quote + prefix + "." + provisionNumber + quote);
 			terms.add(quote + prefix + " " + provisionNumber + quote);
 			terms.add(quote + prefix + ". " + provisionNumber + quote);
 			
@@ -94,5 +96,21 @@ public class Main {
 		}	
 	
 		return expandedQuery;			
-	}	
+	}
+	
+	public static String retrieveQueryFieldValues()
+	{
+		//Get the novus field values from the inputted query string
+		return null;
+	}
+	
+	public void addAdditionalFields()
+	{
+		//add info type field etc
+	}
+	
+	public void changeFieldName()
+	{
+		// amend field value for certain provision types
+	}
 }
