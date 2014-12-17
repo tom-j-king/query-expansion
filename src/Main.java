@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
 public class Main {
 
 	public static void main(String[] args) throws Exception {		
@@ -30,14 +33,15 @@ public class Main {
 		String inputtedProvisionType = br.readLine();
 		
 		//Only set up to deal with "section" and "regulation" provision types
-		if (inputtedProvisionType.equals("section") || inputtedProvisionType.equals("regulation") ||
-				inputtedProvisionType.equals("rule"))
+		if (inputtedProvisionType.equals("article") || inputtedProvisionType.equals("chapter") || inputtedProvisionType.equals("paragraph")
+				|| inputtedProvisionType.equals("part") || inputtedProvisionType.equals("regulation") || inputtedProvisionType.equals("rule")
+				|| inputtedProvisionType.equals("section") || inputtedProvisionType.equals("schedule"))
 		{			
 			provType = inputtedProvisionType;
 		}
 		else
 		{
-			System.out.print("Please run again inputting either \"section\", \"rule\" or \"regulation\" for provision type");
+			System.out.print("Please run again inputting a valid provision type.");
 			System.exit(1);
 		}	
 		
@@ -53,37 +57,40 @@ public class Main {
 	public static String expandQuery(final String provisionType, final String provisionNumber) {				
 	
 		//map would be injected as xml bean
-		final Map<String, Object> provTypes = new HashMap<String, Object>();			
-		final String[] sectionPrefixes = {"section", "s"};
-		final String[] regulationPrefixes = {"regulation", "reg", "r"};
-		final String[] rulePrefixes = {"rule", "r"};
-		provTypes.put("section", sectionPrefixes);
+		final Map<String, List> provTypes = new HashMap<String, List>();			
+		List<String> articlePrefixes = Arrays.asList("article", "art");
+		List<String> chapterPrefixes = Arrays.asList("chapter");
+		List<String> paragraphPrefixes = Arrays.asList("paragraph", "para");
+		List<String> partPrefixes = Arrays.asList("part", "par", "pt", "p", "schpart");
+		List<String> regulationPrefixes = Arrays.asList("regulation", "reg", "r");
+		List<String> rulePrefixes = Arrays.asList("rule", "r");
+		List<String> sectionPrefixes = Arrays.asList("section", "s");		
+		List<String> schedulePrefixes = Arrays.asList("schedule", "sch");		
+		
+		provTypes.put("article", articlePrefixes);
+		provTypes.put("chapter", chapterPrefixes);
+		provTypes.put("paragraph", paragraphPrefixes);
+		provTypes.put("part", partPrefixes);
 		provTypes.put("regulation", regulationPrefixes);
 		provTypes.put("rule", rulePrefixes);
+		provTypes.put("section", sectionPrefixes);
+		provTypes.put("schedule", schedulePrefixes);		
 		
-		final String or = " OR ";
 		final String quote = "\"";
 		String expandedQuery = "";
+		Joiner termJoiner = Joiner.on(" OR ");
 		
-		List<String> currentPrefixes = Arrays.asList((String[]) provTypes.get(provisionType));	
-	
-		//need to find last value in List
-		for (int i = 0; i < currentPrefixes.size(); i++)
+		List<String> currentPrefixes = provTypes.get(provisionType);
+		List<String> terms = Lists.newArrayList();
+		
+		for (String prefix : currentPrefixes)
 		{			
-			String prefix = currentPrefixes.get(i);
-			//Pre-formed permutations of the query
-			String noSpace = prefix + "" + provisionNumber + or;
-			String noSpacePoint = prefix +"." + provisionNumber + or;
-			String spaceOnly = quote + prefix + " " + provisionNumber + quote + or;
-			String spacePoint = quote + prefix + ". " + provisionNumber + quote;
+			terms.add(prefix + "" + provisionNumber);
+			terms.add(prefix +"." + provisionNumber);
+			terms.add(quote + prefix + " " + provisionNumber + quote);
+			terms.add(quote + prefix + ". " + provisionNumber + quote);
 			
-			//don't concatenate " or " to last prefix
-			if (i < currentPrefixes.size() - 1)
-			{
-				spacePoint = spacePoint + or;
-			}
-			
-			expandedQuery = expandedQuery + noSpace + noSpacePoint + spaceOnly + spacePoint;			
+			expandedQuery = termJoiner.join(terms);						
 		}	
 	
 		return expandedQuery;			
