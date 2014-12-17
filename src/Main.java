@@ -1,8 +1,9 @@
 /* 
  * Basic class to illustrate expanding a provision query for Legislation Advanced Query
  * 
- * Uses map containing prefixes for each provision type to expand out the provision query  
- *  
+ * Uses map containing prefixes for each provision type to expand out the provision query
+ * 
+ *  Added comment to test git commit from local machine
 */
 
 import java.io.BufferedReader;
