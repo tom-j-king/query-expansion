@@ -115,17 +115,13 @@ public class Main {
 	
 	public static String retrieveQueryFieldValues(final Pattern pattern, final String query)
 	{
-		String value = "";
+		String fieldValue = query;
 		Matcher matcher = pattern.matcher(query);
 		if (matcher.find())
 		{
-			value = matcher.group(1);
-		}
-		else
-		{
-			value = "Didn't work";
-		}
-		return value;
+			fieldValue = matcher.group(1);
+		}		
+		return fieldValue;
 	}
 	
 	public void addAdditionalFields()
