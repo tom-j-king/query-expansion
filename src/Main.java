@@ -182,7 +182,7 @@ public class Main {
 	
 	public static String retrieveQueryFieldValue(final Pattern pattern, final String query)
 	{
-		String fieldValue = query;
+		String fieldValue = query;		
 		Matcher matcher = pattern.matcher(query);
 		if (matcher.find())
 		{
