@@ -59,7 +59,7 @@ public class Main {
 		String provNumberValue = "";
 		
 		//need to catch with title but no correctly other defined fields. don't want to do anything with this query
-		if(!inputtedQuery.matches("TI\\(.+?\\) & PT\\(.+?\\) & PR\\(.+?\\)"))
+		if(!inputtedQuery.matches("TI\\(.+?\\)\\s&\\sPT\\(.+?\\)\\s&\\sPR\\(.+?\\)"))
 		{
 			System.out.println("valid query for expansion");
 		}
