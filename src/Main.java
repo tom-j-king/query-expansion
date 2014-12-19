@@ -58,6 +58,10 @@ public class Main {
 		String provNumberValue = "";
 		
 		//need to catch with title but no correctly other defined fields. don't want to do anything with this query
+		if(inputtedQuery.matches("TI\\(.+?\\) & PT\\(.+?\\) & PR\\(.+?\\)"))
+		{
+			System.out.println("valid query for expansion");
+		}
 		if(inputtedQuery.matches("TI\\(.+?\\)"))
 		{			
 			titleValue = retrieveQueryFieldValue(TITLE_FIELD_PATTERN, inputtedQuery);
@@ -66,7 +70,7 @@ public class Main {
 		if(inputtedQuery.matches(".+?PT\\(.+?\\)"))
 		{
 			provTypeValue = retrieveQueryFieldValue(PROVTYPE_FIELD_PATTERN, inputtedQuery);
-			System.out.println("i have a prov type: " + provTypeValue);
+			
 		}
 		if(inputtedQuery.matches(".+?PR\\(.+?\\)"))
 		{
@@ -186,7 +190,7 @@ public class Main {
 		return fieldValue;
 	}
 	
-	public void addAdditionalFields()
+	public void addAdditionalFields(final String provType, final String expandedQuery)
 	{
 		//add info type field etc
 	}
