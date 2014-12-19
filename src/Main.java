@@ -51,15 +51,18 @@ public class Main {
 		
 		if(inputtedQuery.matches("TI\\(.+?\\)"))
 		{
-			System.out.println("i have a title");
+			final String value = retrieveQueryFieldValues(TITLE_FIELD_PATTERN, inputtedQuery);
+			System.out.println("i have a title: " + value);
 		}
 		if(inputtedQuery.matches(".+?PT\\(.+?\\)"))
 		{
-			System.out.println("i have a prov type");
+			final String value = retrieveQueryFieldValues(PROVTYPE_FIELD_PATTERN, inputtedQuery);
+			System.out.println("i have a prov type: " + value);
 		}
 		if(inputtedQuery.matches(".+?PR\\(.+?\\)"))
 		{
-			System.out.println("i have a prov number");
+			final String value = retrieveQueryFieldValues(PROVNUMBER_FIELD_PATTERN, inputtedQuery);
+			System.out.println("i have a prov number: " + value);
 		}
 		
 		if (recognizedProvisionTypes.contains(inputtedProvisionType))
