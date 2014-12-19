@@ -22,7 +22,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class Main {
-
+	
+	public static final Pattern PROVISION_SEARCH_PATTERN = Pattern.compile("TI\\(.+?\\) & PT\\(.+?\\) & PR\\(.+?\\)");
 	public static final Pattern PROVNUMBER_FIELD_PATTERN = Pattern.compile("PR\\((.*?)\\)");
 	public static final Pattern PROVTYPE_FIELD_PATTERN = Pattern.compile("PT\\((.*?)\\)");
 	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.*?)\\)");
@@ -58,7 +59,7 @@ public class Main {
 		String provNumberValue = "";
 		
 		//need to catch with title but no correctly other defined fields. don't want to do anything with this query
-		if(inputtedQuery.matches("TI\\(.+?\\) & PT\\(.+?\\) & PR\\(.+?\\)"))
+		if(!inputtedQuery.matches("TI\\(.+?\\) & PT\\(.+?\\) & PR\\(.+?\\)"))
 		{
 			System.out.println("valid query for expansion");
 		}
@@ -193,10 +194,5 @@ public class Main {
 	public void addAdditionalFields(final String provType, final String expandedQuery)
 	{
 		//add info type field etc
-	}
-	
-	public void changeFieldName()
-	{
-		// amend field value for certain provision types
-	}
+	}	
 }
