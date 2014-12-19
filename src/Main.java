@@ -27,6 +27,9 @@ public class Main {
 	public static final Pattern PROVTYPE_FIELD_PATTERN = Pattern.compile("PT\\((.*?)\\)");
 	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.*?)\\)");
 	
+	private static final String novusTitlePattern = "TI(titleValue)";
+	private static final String novusExpandedProvisionPattern = "FIELD(expandedProvisionQuery)";
+	
 	public static void main(String[] args) throws Exception {		
 		displayQuery();		
 	}
@@ -44,27 +47,54 @@ public class Main {
 				"section",
 				"schedule");		
 			
-		System.out.print("Enter Provision Type: ");
-		String inputtedProvisionType = br.readLine();
-		String inputtedQuery = "TI(planning & act & 2008) & PT(ARTICLE) & PR(1)";		
+		System.out.print("Enter Legislation Query: ");		
+		//String inputtedProvisionType = br.readLine();
+		String inputtedQuery = br.readLine();		
 		
+		//need to check form of query to cater for user directly entering advanced query from the search box, bypassing the form - front end?
+		
+		String titleValue = "";		
+		String provTypeValue = "";		
+		String provNumberValue = "";
+		
+		//need to catch with title but no correctly other defined fields. don't want to do anything with this query
 		if(inputtedQuery.matches("TI\\(.+?\\)"))
-		{
-			final String value = retrieveQueryFieldValue(TITLE_FIELD_PATTERN, inputtedQuery);
-			System.out.println("i have a title: " + value);
+		{			
+			titleValue = retrieveQueryFieldValue(TITLE_FIELD_PATTERN, inputtedQuery);
+			System.out.println("i have a title: " + titleValue);
 		}
 		if(inputtedQuery.matches(".+?PT\\(.+?\\)"))
 		{
-			final String value = retrieveQueryFieldValue(PROVTYPE_FIELD_PATTERN, inputtedQuery);
-			System.out.println("i have a prov type: " + value);
+			provTypeValue = retrieveQueryFieldValue(PROVTYPE_FIELD_PATTERN, inputtedQuery);
+			System.out.println("i have a prov type: " + provTypeValue);
 		}
 		if(inputtedQuery.matches(".+?PR\\(.+?\\)"))
 		{
-			final String value = retrieveQueryFieldValue(PROVNUMBER_FIELD_PATTERN, inputtedQuery);
-			System.out.println("i have a prov number: " + value);
+			provNumberValue = retrieveQueryFieldValue(PROVNUMBER_FIELD_PATTERN, inputtedQuery);
+			System.out.println("i have a prov number: " + provNumberValue);
+		}		
+		
+		//if either PT or PR missing just return the title as the query
+		if(provTypeValue.isEmpty() || provNumberValue.isEmpty())
+		{
+			//System.out.print("Please run again inputting a valid provision type.");
+			//System.exit(1);
+			final String expandedQuery = novusTitlePattern.replace("titleValue", titleValue);
+			System.out.println("Expanded Query Is: " + expandedQuery);
+		}
+		else
+		{
+			final String expandedProvisionQuery = expandQuery(provTypeValue, provNumberValue);
+			final String field = calculateNovusFieldPrefix(provTypeValue);
+			final String expandedQuery = 
+					novusTitlePattern.replace("titleValue", titleValue) 
+					    + " & " + novusExpandedProvisionPattern
+					    .replace("FIELD", field)
+					    .replace("expandedProvisionQuery", expandedProvisionQuery);
+			System.out.println("Expanded Query Is: " + expandedQuery);
 		}
 		
-		if (recognizedProvisionTypes.contains(inputtedProvisionType))
+		/*if (recognizedProvisionTypes.contains(value))
 		{			
 			final String provType = inputtedProvisionType;
 			
@@ -83,7 +113,7 @@ public class Main {
 		{
 			System.out.print("Please run again inputting a valid provision type.");
 			System.exit(1);
-		}		
+		}*/		
 	}
 
 	public static String expandQuery(final String provisionType, final String provisionNumber) {				
@@ -127,6 +157,22 @@ public class Main {
 		final String expandedQuery = termJoiner.join(terms);
 	
 		return expandedQuery;			
+	}
+	
+	public static String calculateNovusFieldPrefix(final String provisionType)
+	{
+		String novusFieldPrefix = "PR";
+		Set<String> caProvisionTypes = ImmutableSet.of(				
+				"article",
+				"chapter",				
+				"part");
+		
+		if(caProvisionTypes.contains(provisionType))
+		{
+			novusFieldPrefix = "CA";
+		}
+		
+		return novusFieldPrefix;
 	}
 	
 	public static String retrieveQueryFieldValue(final Pattern pattern, final String query)
