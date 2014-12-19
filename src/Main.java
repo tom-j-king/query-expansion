@@ -46,22 +46,21 @@ public class Main {
 			
 		System.out.print("Enter Provision Type: ");
 		String inputtedProvisionType = br.readLine();
-		String inputtedQuery = "TI(planning act 2008) & PT(ARTICLE) & PR(1)";
-		String[] queryComponents = inputtedQuery.split("[[TI]|[PT]|[PR]]\\((.*?)\\)");
+		String inputtedQuery = "TI(planning & act & 2008) & PT(ARTICLE) & PR(1)";		
 		
 		if(inputtedQuery.matches("TI\\(.+?\\)"))
 		{
-			final String value = retrieveQueryFieldValues(TITLE_FIELD_PATTERN, inputtedQuery);
+			final String value = retrieveQueryFieldValue(TITLE_FIELD_PATTERN, inputtedQuery);
 			System.out.println("i have a title: " + value);
 		}
 		if(inputtedQuery.matches(".+?PT\\(.+?\\)"))
 		{
-			final String value = retrieveQueryFieldValues(PROVTYPE_FIELD_PATTERN, inputtedQuery);
+			final String value = retrieveQueryFieldValue(PROVTYPE_FIELD_PATTERN, inputtedQuery);
 			System.out.println("i have a prov type: " + value);
 		}
 		if(inputtedQuery.matches(".+?PR\\(.+?\\)"))
 		{
-			final String value = retrieveQueryFieldValues(PROVNUMBER_FIELD_PATTERN, inputtedQuery);
+			final String value = retrieveQueryFieldValue(PROVNUMBER_FIELD_PATTERN, inputtedQuery);
 			System.out.println("i have a prov number: " + value);
 		}
 		
@@ -74,19 +73,11 @@ public class Main {
 			final String provNumber = inputtedProvisionNumber;
 			
 			System.out.print("Enter full query sting: ");
-			String inputtedQueryString = br.readLine();
-			
-			//need to go through additional level of processing to assess if has each of the components
-			String titleField = retrieveQueryFieldValues(TITLE_FIELD_PATTERN, inputtedQueryString);
-			String provTypeField = retrieveQueryFieldValues(PROVTYPE_FIELD_PATTERN, inputtedQueryString);
-			String provNumberField = retrieveQueryFieldValues(PROVNUMBER_FIELD_PATTERN, inputtedQueryString);
+			String inputtedQueryString = br.readLine();			
 			
 			final String expandedQuery = expandQuery(provType, provNumber);
 			
-			System.out.println("Expanded Query Is: " + expandedQuery);
-			System.out.println("Title Field Value Is: " + titleField);
-			System.out.println("Type Field Value Is: " + provTypeField);
-			System.out.println("Number Field Value Is: " + provNumberField);						
+			System.out.println("Expanded Query Is: " + expandedQuery);									
 		}
 		else
 		{
@@ -138,7 +129,7 @@ public class Main {
 		return expandedQuery;			
 	}
 	
-	public static String retrieveQueryFieldValues(final Pattern pattern, final String query)
+	public static String retrieveQueryFieldValue(final Pattern pattern, final String query)
 	{
 		String fieldValue = query;
 		Matcher matcher = pattern.matcher(query);
