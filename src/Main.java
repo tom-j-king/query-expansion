@@ -12,11 +12,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class Main {
 
@@ -31,48 +34,68 @@ public class Main {
 	//method here for ability to run query expansion method via console window to speed up development
 	public static void displayQuery() throws Exception {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-	
-		String provType = "";
-		String provNumber;	
-		String expandedQuery;
-	
+		Set<String> recognizedProvisionTypes = ImmutableSet.of(
+				"article",
+				"chapter",
+				"paragraph",
+				"part",
+				"regulation",
+				"rule",
+				"section",
+				"schedule");		
+			
 		System.out.print("Enter Provision Type: ");
-		String inputtedProvisionType = br.readLine();		
+		String inputtedProvisionType = br.readLine();
+		String inputtedQuery = "TI(planning act 2008) & PT(ARTICLE) & PR(1)";
+		String[] queryComponents = inputtedQuery.split("[[TI]|[PT]|[PR]]\\((.*?)\\)");
 		
-		if (inputtedProvisionType.equals("article") || inputtedProvisionType.equals("chapter") || inputtedProvisionType.equals("paragraph")
-				|| inputtedProvisionType.equals("part") || inputtedProvisionType.equals("regulation") || inputtedProvisionType.equals("rule")
-				|| inputtedProvisionType.equals("section") || inputtedProvisionType.equals("schedule"))
+		if(inputtedQuery.matches("TI\\(.+?\\)"))
+		{
+			System.out.println("i have a title");
+		}
+		if(inputtedQuery.matches(".+?PT\\(.+?\\)"))
+		{
+			System.out.println("i have a prov type");
+		}
+		if(inputtedQuery.matches(".+?PR\\(.+?\\)"))
+		{
+			System.out.println("i have a prov number");
+		}
+		
+		if (recognizedProvisionTypes.contains(inputtedProvisionType))
 		{			
-			provType = inputtedProvisionType;
+			final String provType = inputtedProvisionType;
+			
+			System.out.print("Enter Provision Number: ");
+			String inputtedProvisionNumber = br.readLine();
+			final String provNumber = inputtedProvisionNumber;
+			
+			System.out.print("Enter full query sting: ");
+			String inputtedQueryString = br.readLine();
+			
+			//need to go through additional level of processing to assess if has each of the components
+			String titleField = retrieveQueryFieldValues(TITLE_FIELD_PATTERN, inputtedQueryString);
+			String provTypeField = retrieveQueryFieldValues(PROVTYPE_FIELD_PATTERN, inputtedQueryString);
+			String provNumberField = retrieveQueryFieldValues(PROVNUMBER_FIELD_PATTERN, inputtedQueryString);
+			
+			final String expandedQuery = expandQuery(provType, provNumber);
+			
+			System.out.println("Expanded Query Is: " + expandedQuery);
+			System.out.println("Title Field Value Is: " + titleField);
+			System.out.println("Type Field Value Is: " + provTypeField);
+			System.out.println("Number Field Value Is: " + provNumberField);						
 		}
 		else
 		{
 			System.out.print("Please run again inputting a valid provision type.");
 			System.exit(1);
-		}	
-		
-		System.out.print("Enter Provision Number: ");
-		String inputtedProvisionNumber = br.readLine();
-		provNumber = inputtedProvisionNumber;
-		
-		System.out.print("Enter full query sting: ");
-		String inputtedQueryString = br.readLine();		
-		String titleField = retrieveQueryFieldValues(TITLE_FIELD_PATTERN, inputtedQueryString);
-		String provTypeField = retrieveQueryFieldValues(PROVTYPE_FIELD_PATTERN, inputtedQueryString);
-		String provNumberField = retrieveQueryFieldValues(PROVNUMBER_FIELD_PATTERN, inputtedQueryString);
-		
-		expandedQuery = expandQuery(provType, provNumber);
-		
-		System.out.println("Expanded Query Is: " + expandedQuery);
-		System.out.println("Title Field Value Is: " + titleField);
-		System.out.println("Type Field Value Is: " + provTypeField);
-		System.out.println("Number Field Value Is: " + provNumberField);
+		}		
 	}
 
 	public static String expandQuery(final String provisionType, final String provisionNumber) {				
 	
 		//map would be injected as xml bean
-		final Map<String, List> provTypes = new HashMap<String, List>();			
+		final Map<String, List> provTypes = Maps.newHashMap();			
 		List<String> articlePrefixes = Arrays.asList("article", "art");
 		List<String> chapterPrefixes = Arrays.asList("chapter");
 		List<String> paragraphPrefixes = Arrays.asList("paragraph", "para");
@@ -91,8 +114,7 @@ public class Main {
 		provTypes.put("section", sectionPrefixes);
 		provTypes.put("schedule", schedulePrefixes);		
 		
-		final String quote = "\"";
-		String expandedQuery = "";
+		final String quote = "\"";		
 		Joiner termJoiner = Joiner.on(" OR ");
 		
 		List<String> currentPrefixes = provTypes.get(provisionType);
@@ -105,10 +127,10 @@ public class Main {
 			terms.add(prefix + "." + provisionNumber);
 			terms.add(quote + prefix + "." + provisionNumber + quote);
 			terms.add(quote + prefix + " " + provisionNumber + quote);
-			terms.add(quote + prefix + ". " + provisionNumber + quote);
-			
-			expandedQuery = termJoiner.join(terms);						
-		}	
+			terms.add(quote + prefix + ". " + provisionNumber + quote);									
+		}
+		
+		final String expandedQuery = termJoiner.join(terms);
 	
 		return expandedQuery;			
 	}
