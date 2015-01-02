@@ -119,8 +119,8 @@ public class Main {
 		
 		if (provType != null && provNumber != null)
 		{
-			provType = retrieveQueryFieldValue(PROVTYPE_FIELD_PATTERN, provType);
-			provNumber = retrieveQueryFieldValue(PROVNUMBER_FIELD_PATTERN, provNumber);
+			provType = retrieveQueryFieldValue(provType);
+			provNumber = retrieveQueryFieldValue(provNumber);
 			final String field = calculateNovusFieldPrefix(provType);			
 			final String provSearch = expandQuery(provType, provNumber);
 			final String expandedQuery = novusExpandedProvisionPattern
@@ -129,9 +129,7 @@ public class Main {
 					
 			System.out.println("Expanded Query: " + expandedQuery);
 			terms.add(expandedQuery);
-		}
-		
-		System.out.println(terms.toString());
+		}	
 		
 		final String expandedQuery = termJoiner.join(terms);
 		System.out.println("Expanded Query Is: " + expandedQuery);
@@ -168,6 +166,7 @@ public class Main {
 		final String quote = "\"";		
 		Joiner termJoiner = Joiner.on(" OR ");
 		
+		//Error test if if PT is not a valid type if so do nothing
 		List<String> currentPrefixes = provTypes.get(provisionType);
 		List<String> terms = Lists.newArrayList();
 		
