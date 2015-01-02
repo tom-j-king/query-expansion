@@ -23,10 +23,15 @@ import com.google.common.collect.Maps;
 
 public class Main {
 	
-	public static final Pattern PROVISION_SEARCH_PATTERN = Pattern.compile("TI\\(.+?\\) & PT\\(.+?\\) & PR\\(.+?\\)");
-	public static final Pattern PROVNUMBER_FIELD_PATTERN = Pattern.compile("PR\\((.*?)\\)");
-	public static final Pattern PROVTYPE_FIELD_PATTERN = Pattern.compile("PT\\((.*?)\\)");
-	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.*?)\\)(?!.+)");
+	public static final Pattern PROVISION_SEARCH_PATTERN = Pattern.compile("TI\\(.+?\\)\\s&\\sPT\\(.+?\\)\\s&\\sPR\\(.+?\\)(?!.+)");
+	public static final Pattern PROVNUMBER_FIELD_PATTERN = Pattern.compile("PR\\((.+?)\\)");
+	public static final Pattern PROVTYPE_FIELD_PATTERN = Pattern.compile("PT\\((.+?)\\)");
+	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.+?)\\)(?!.+)");
+	
+	public static final Pattern NON_TITLE_FIELD_PATTERN = Pattern.compile("[A-Z&&[^T]][A-Z&&[^I]]\\(.+?\\)");
+	public static final Pattern NON_PROV_SEARCH_FIELD_PATTERN = Pattern.compile("[A-Z&&[^P]][A-Z&&[^T|^R]]\\(.+?\\)");
+	
+	public static final Pattern NON_RECOG_FIELD_PATTERN = Pattern.compile("[A-Z&&[^T|^P]A-Z&&[^I|^T|^R]]\\(.+?\\)");
 	
 	private static final String novusTitlePattern = "TI(titleValue)";
 	private static final String novusExpandedProvisionPattern = "FIELD(expandedProvisionQuery)";
@@ -50,7 +55,9 @@ public class Main {
 			
 		System.out.print("Enter Legislation Query: ");		
 		//String inputtedProvisionType = br.readLine();
-		String inputtedQuery = br.readLine();		
+		String inputtedQuery = br.readLine();
+		
+		queryIsForExpansion(inputtedQuery);
 		
 		//need to check form of query to cater for user directly entering advanced query from the search box, bypassing the form - front end?
 		
@@ -119,6 +126,29 @@ public class Main {
 			System.out.print("Please run again inputting a valid provision type.");
 			System.exit(1);
 		}*/		
+	}
+	
+	public static boolean queryIsForExpansion(final String query)
+	{
+		//Only expand if pattern matches exactly
+		boolean isForExpansion = false;
+		
+		System.out.println("Is For Expansion Before: " + isForExpansion);
+		
+		Matcher titleQueryMatcher = TITLE_FIELD_PATTERN.matcher(query);		
+		Matcher nonRecogFields = NON_RECOG_FIELD_PATTERN.matcher(query);		
+		
+		if (titleQueryMatcher.find())
+		{
+			if (!nonRecogFields.find())
+			{
+				isForExpansion = true;
+			}			
+		}
+				
+		System.out.println("Is For Expansion After: " + isForExpansion);
+		
+		return isForExpansion;
 	}
 
 	public static String expandQuery(final String provisionType, final String provisionNumber) {				
