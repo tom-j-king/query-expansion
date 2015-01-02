@@ -26,7 +26,7 @@ public class Main {
 	public static final Pattern PROVISION_SEARCH_PATTERN = Pattern.compile("TI\\(.+?\\) & PT\\(.+?\\) & PR\\(.+?\\)");
 	public static final Pattern PROVNUMBER_FIELD_PATTERN = Pattern.compile("PR\\((.*?)\\)");
 	public static final Pattern PROVTYPE_FIELD_PATTERN = Pattern.compile("PT\\((.*?)\\)");
-	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.*?)\\)");
+	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.*?)\\)(?!.+)");
 	
 	private static final String novusTitlePattern = "TI(titleValue)";
 	private static final String novusExpandedProvisionPattern = "FIELD(expandedProvisionQuery)";
