@@ -9,7 +9,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,17 +22,16 @@ import com.google.common.collect.Maps;
 
 public class Main {
 	
-	public static final Pattern PROVISION_SEARCH_PATTERN = Pattern.compile("TI\\(.+?\\)\\s&\\sPT\\(.+?\\)\\s&\\sPR\\(.+?\\)(?!.+)");
+	public static final Pattern PROVISION_SEARCH_PATTERN = Pattern.compile("TI\\(.+?\\)\\s&\\sPT\\(.+?\\)\\s&\\sPR\\(.+?\\)");
 	public static final Pattern PROVNUMBER_FIELD_PATTERN = Pattern.compile("PR\\((.+?)\\)");
 	public static final Pattern PROVTYPE_FIELD_PATTERN = Pattern.compile("PT\\((.+?)\\)");
-	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.+?)\\)(?!.+)");
+	public static final Pattern TITLE_FIELD_PATTERN = Pattern.compile("TI\\((.+?)\\)");
 	
 	public static final Pattern NON_TITLE_FIELD_PATTERN = Pattern.compile("[A-Z&&[^T]][A-Z&&[^I]]\\(.+?\\)");
 	public static final Pattern NON_PROV_SEARCH_FIELD_PATTERN = Pattern.compile("[A-Z&&[^P]][A-Z&&[^T|^R]]\\(.+?\\)");
 	
-	public static final Pattern NON_RECOG_FIELD_PATTERN = Pattern.compile("[A-Z&&[^T|^P]A-Z&&[^I|^T|^R]]\\(.+?\\)");
+	public static final Pattern NON_RECOG_FIELD_PATTERN = Pattern.compile("[A-Z&&[^T|^P]A-Z&&[^I|^T|^R]]\\(.+?\\)");	
 	
-	private static final String novusTitlePattern = "TI(titleValue)";
 	private static final String novusExpandedProvisionPattern = "FIELD(expandedProvisionQuery)";
 	
 	public static void main(String[] args) throws Exception {		
@@ -55,100 +53,94 @@ public class Main {
 			
 		System.out.print("Enter Legislation Query: ");		
 		//String inputtedProvisionType = br.readLine();
-		String inputtedQuery = br.readLine();
+		String inputtedQuery = br.readLine().trim();		
 		
-		queryIsForExpansion(inputtedQuery);
-		
-		//need to check form of query to cater for user directly entering advanced query from the search box, bypassing the form - front end?
-		
-		String titleValue = "";		
-		String provTypeValue = "";		
-		String provNumberValue = "";
-		
-		//need to catch with title but no correctly other defined fields. don't want to do anything with this query
-		if(!inputtedQuery.matches("TI\\(.+?\\)\\s&\\sPT\\(.+?\\)\\s&\\sPR\\(.+?\\)"))
-		{
-			System.out.println("valid query for expansion");
-		}
-		if(inputtedQuery.matches("TI\\(.+?\\)"))
+		if (queryIsForExpansion(inputtedQuery))
 		{			
-			titleValue = retrieveQueryFieldValue(TITLE_FIELD_PATTERN, inputtedQuery);
-			System.out.println("i have a title: " + titleValue);
-		}
-		if(inputtedQuery.matches(".+?PT\\(.+?\\)"))
-		{
-			provTypeValue = retrieveQueryFieldValue(PROVTYPE_FIELD_PATTERN, inputtedQuery);
-			
-		}
-		if(inputtedQuery.matches(".+?PR\\(.+?\\)"))
-		{
-			provNumberValue = retrieveQueryFieldValue(PROVNUMBER_FIELD_PATTERN, inputtedQuery);
-			System.out.println("i have a prov number: " + provNumberValue);
-		}		
-		
-		//if either PT or PR missing just return the title as the query
-		if(provTypeValue.isEmpty() || provNumberValue.isEmpty())
-		{
-			//System.out.print("Please run again inputting a valid provision type.");
-			//System.exit(1);
-			final String expandedQuery = novusTitlePattern.replace("titleValue", titleValue);
-			System.out.println("Expanded Query Is: " + expandedQuery);
-		}
-		else
-		{
-			final String expandedProvisionQuery = expandQuery(provTypeValue, provNumberValue);
-			final String field = calculateNovusFieldPrefix(provTypeValue);
-			final String expandedQuery = 
-					novusTitlePattern.replace("titleValue", titleValue) 
-					    + " & " + novusExpandedProvisionPattern
-					    .replace("FIELD", field)
-					    .replace("expandedProvisionQuery", expandedProvisionQuery);
-			System.out.println("Expanded Query Is: " + expandedQuery);
-		}
-		
-		/*if (recognizedProvisionTypes.contains(value))
-		{			
-			final String provType = inputtedProvisionType;
-			
-			System.out.print("Enter Provision Number: ");
-			String inputtedProvisionNumber = br.readLine();
-			final String provNumber = inputtedProvisionNumber;
-			
-			System.out.print("Enter full query sting: ");
-			String inputtedQueryString = br.readLine();			
-			
-			final String expandedQuery = expandQuery(provType, provNumber);
-			
-			System.out.println("Expanded Query Is: " + expandedQuery);									
-		}
-		else
-		{
-			System.out.print("Please run again inputting a valid provision type.");
-			System.exit(1);
-		}*/		
+			queryComponents(inputtedQuery);
+		}				
 	}
 	
 	public static boolean queryIsForExpansion(final String query)
 	{
-		//Only expand if pattern matches exactly
-		boolean isForExpansion = false;
+		//Only expand if TI field present
+		boolean isForExpansion = false;		
 		
-		System.out.println("Is For Expansion Before: " + isForExpansion);
-		
-		Matcher titleQueryMatcher = TITLE_FIELD_PATTERN.matcher(query);		
-		Matcher nonRecogFields = NON_RECOG_FIELD_PATTERN.matcher(query);		
+		Matcher titleQueryMatcher = TITLE_FIELD_PATTERN.matcher(query);				
 		
 		if (titleQueryMatcher.find())
 		{
-			if (!nonRecogFields.find())
-			{
-				isForExpansion = true;
-			}			
-		}
-				
-		System.out.println("Is For Expansion After: " + isForExpansion);
+			isForExpansion = true;						
+		}	
 		
 		return isForExpansion;
+	}
+	
+	//Assuming title is not "ANDED"can split on " & "
+	public static void queryComponents(final String query)
+	{
+		String str = query;
+		String title = null;
+		String provType = null;
+		String provNumber = null;
+		Joiner termJoiner = Joiner.on(" & ");
+		List<String> terms = Lists.newArrayList();
+		
+		for (String component : str.split("\\s&\\s"))
+		{			
+			if(component.matches("TI\\((.+?)\\)"))
+			{
+				title = andTitle(component);				
+				terms.add(title);
+			}
+			else if (component.matches("PT\\((.+?)\\)"))
+			{
+				provType = component;				
+			}
+			else if (component.matches("PR\\((.+?)\\)"))
+			{
+				provNumber = component;				
+			}
+			else
+			{
+				terms.add(component);
+			}						
+		}
+		
+		//Title only query manipulation
+		if(terms.size() == 1)
+		{
+			String singleComponent = terms.get(0);
+			if(singleComponent.matches("TI\\((.+?)\\)"))
+			{
+				terms.add("(PR(\"arrangement of act\" OR \"arrangement of si\" OR \"arrangement of document\"))");
+			}
+		}
+		
+		if (provType != null && provNumber != null)
+		{
+			provType = retrieveQueryFieldValue(PROVTYPE_FIELD_PATTERN, provType);
+			provNumber = retrieveQueryFieldValue(PROVNUMBER_FIELD_PATTERN, provNumber);
+			final String field = calculateNovusFieldPrefix(provType);			
+			final String provSearch = expandQuery(provType, provNumber);
+			final String expandedQuery = novusExpandedProvisionPattern
+				    .replace("FIELD", field)
+				    .replace("expandedProvisionQuery", provSearch);
+					
+			System.out.println("Expanded Query: " + expandedQuery);
+			terms.add(expandedQuery);
+		}
+		
+		System.out.println(terms.toString());
+		
+		final String expandedQuery = termJoiner.join(terms);
+		System.out.println("Expanded Query Is: " + expandedQuery);
+	}	
+	
+	public static String andTitle(final String titleValue)
+	{
+		final String title = titleValue.replaceAll(" ", " & ");		
+		return title;
 	}
 
 	public static String expandQuery(final String provisionType, final String provisionNumber) {				
@@ -187,9 +179,13 @@ public class Main {
 			terms.add(quote + prefix + "." + provisionNumber + quote);
 			terms.add(quote + prefix + " " + provisionNumber + quote);
 			terms.add(quote + prefix + ". " + provisionNumber + quote);									
-		}
+		}		
 		
-		final String expandedQuery = termJoiner.join(terms);
+		String expandedQuery = termJoiner.join(terms);
+		if (provisionType.equals("chapter"))
+		{
+			expandedQuery = expandedQuery + " & (md.infotype(\"legis-AOP\") OR md.infotype(\"legis-AOP-scottish\"))";
+		}
 	
 		return expandedQuery;			
 	}
@@ -221,8 +217,14 @@ public class Main {
 		return fieldValue;
 	}
 	
-	public void addAdditionalFields(final String provType, final String expandedQuery)
+	public static String retrieveQueryFieldValue(final String query)
 	{
-		//add info type field etc
-	}	
+		String fieldValue = query;
+		final int openParenthesis = fieldValue.indexOf("(");
+		final int closeParenthesis = fieldValue.lastIndexOf(")");
+		
+		fieldValue = fieldValue.substring(openParenthesis + 1, closeParenthesis);
+		
+		return fieldValue;
+	}		
 }
